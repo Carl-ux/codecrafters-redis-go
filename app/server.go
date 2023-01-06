@@ -39,7 +39,7 @@ func main() {
 
 		// Let's ignore the client's input for now and hardcode a response.
 		// We'll implement a proper Redis Protocol parser in later stages.
-		//stage2 respond to ping
+		//stage2 respond to ping cmd
 		pingHandler(conn)
 	}
 }
