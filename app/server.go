@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	//Uncomment this block to pass the first stage
 	"net"
 	"os"
@@ -9,9 +10,10 @@ import (
 
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
-	fmt.Println("Logs from your program will appear here!")
+	fmt.Println("Redis go build 3rd stage")
 
 	// Uncomment this block to pass the first stage
+	//stage1 bind to a port
 	l, err := net.Listen("tcp", "0.0.0.0:6379")
 	if err != nil {
 		fmt.Println("Failed to bind to port 6379")
@@ -23,16 +25,23 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
+	//stage3 forloop
+	for {
+		buf := make([]byte, 1024) //slice
+		_, err := conn.Read(buf)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Println("error reading from cilent: ", err.Error())
+			os.Exit(1)
+		}
 
-	buf := make([]byte, 1024) //slice
-	if _, err := conn.Read(buf); err != nil {
-		fmt.Println("error reading from cilent: ", err.Error())
-		os.Exit(1)
+		// Let's ignore the client's input for now and hardcode a response.
+		// We'll implement a proper Redis Protocol parser in later stages.
+		//stage2 respond to ping
+		pingHandler(conn)
 	}
-
-	// Let's ignore the client's input for now and hardcode a response.
-	// We'll implement a proper Redis Protocol parser in later stages.
-	pingHandler(conn)
 }
 
 func pingHandler(conn net.Conn) {
