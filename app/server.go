@@ -16,6 +16,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	db := newStore()
+
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -23,11 +25,11 @@ func main() {
 			os.Exit(1)
 		}
 
-		go handleConnection(conn)
+		go handleConnection(conn, db)
 	}
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, db *store) {
 	defer conn.Close()
 
 	for {
@@ -48,6 +50,11 @@ func handleConnection(conn net.Conn) {
 			conn.Write([]byte("+PONG\r\n"))
 		case "echo":
 			conn.Write([]byte(fmt.Sprintf("$%d\r\n%s\r\n", len(args[0].String()), args[0].String())))
+		case "set":
+			db.Set(args[0].String(), args[1].String())
+			conn.Write([]byte("+OK\r\n"))
+		case "get":
+			conn.Write([]byte(fmt.Sprintf("+%s\r\n", db.Get(args[0].String()))))
 		default:
 			conn.Write([]byte("-ERR unknown command '" + command + "'\r\n"))
 		}
